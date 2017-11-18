@@ -2,13 +2,13 @@
 ToDo API
 
 ## API Endpoint
-| Route           | HTTP   | Require Data | Description          |
-|-----------------|--------|--------------|----------------------|
-| /api/signup/    | POST   | email,token  | signup with facebook |
-| /api/signin/    | POST   | email,token  | signin with facebook |
-| /api/mytodo     | GET    | token        | get only my todo     |
-| /api/add        | POST   | desc         | post new task        |
-| /api/edit/:id   | PUT    | desc         | edit desc            |
-| /api/done/:id   | PUT    | id           | checklist todo       |
-| /api/undone/:id | PUT    | id           | uncheck todo         |
-| /api/del/:id    | DELETE | id           | delete todo          |
+| Route           | HTTP   | Require Data    | Description          |
+|-----------------|--------|-----------------|----------------------|
+| /api/signup/    | POST   | email, password | signup               |
+| /api/signin/    | POST   | email, password | signin return token  |
+| /api/mytodo     | GET    | token           | get only my todo     |
+| /api/add        | POST   | token, todo     | post new todo        |
+| /api/edit/:id   | PUT    | token, todo     | edit desc            |
+| /api/done/:id   | PUT    | token, id       | checklist todo       |
+| /api/undone/:id | PUT    | token, id       | uncheck todo         |
+| /api/del/:id    | DELETE | token, id       | delete todo          |

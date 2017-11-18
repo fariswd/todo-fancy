@@ -7,15 +7,19 @@ const User = require('../models/user')
 *  Return req.body.password (hashed)
 */
 let hashed = (req, res, next) => {
-  const saltRounds = 10
-  const myPlaintextPassword = req.body.password
-  bcrypt.hash(myPlaintextPassword, saltRounds)
-  .then(function(hash) {
-    req.body.password = hash
-    next()
-  }).catch(err=>{
-    res.status(501).send({err: err})
-  })
+  if(req.body.username && req.body.password){
+    const saltRounds = 10
+    const myPlaintextPassword = req.body.password
+    bcrypt.hash(myPlaintextPassword, saltRounds)
+    .then(function(hash) {
+      req.body.password = hash
+      next()
+    }).catch(err=>{
+      res.status(501).send({err: err})
+    })
+  } else {
+    res.status(401).send({err: "wrong input"})
+  }
 }
 
 /* Get: email & password from req.body
@@ -23,19 +27,23 @@ let hashed = (req, res, next) => {
 *  password if true next()
 */
 let unHashed = (req, res, next) => {
-  User.findOne({'email': req.body.email }, function (err, result) {
-    if(err){
-      res.status(501).send({err: err})
-    } else {
-      bcrypt.compare(req.body.password, result.password)
-      .then(function(response) {
-        req.user = result
-        next()
-      }).catch(err=>{
+  if(req.body.username && req.body.password){
+    User.findOne({'email': req.body.email }, function (err, result) {
+      if(err){
         res.status(501).send({err: err})
-      })
-    }
-  })
+      } else {
+        bcrypt.compare(req.body.password, result.password)
+        .then(function(response) {
+          req.user = result
+          next()
+        }).catch(err=>{
+          res.status(501).send({err: err})
+        })
+      }
+    })
+  } else {
+    res.status(401).send({err: "wrong input"})
+  }
 }
 
 module.exports = {

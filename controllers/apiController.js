@@ -3,6 +3,7 @@ const User = require('../models/user')
 const Todo = require('../models/todo')
 
 //require helpers
+const changeStatus = require('../helpers/changeStatus')
 const tok  = require('../helpers/token')
 
 let welcomePage = (req, res) => {
@@ -45,10 +46,12 @@ let signin = (req, res) => {
   //convert to jwt
   tok.sign(obj, (err, token)=>{
     if(err) res.status(501).send(err)
-    res.send({
+    else {
+      res.send({
       msg: 'login success',
       token: token
-    })
+      })
+    }
   })
 }
 
@@ -56,24 +59,136 @@ let signin = (req, res) => {
 *  methode : GET
 *  require : token(id)
 *  desc    : find mytodo from db
-*  return  : all my todo
+*  return  : user, all my todo
 */ 
 let mytodo = (req, res) => {
-  //convert to obj
-  tok.decr(req.headers.token, (err, decoded)=>{
-    Todo.find({userId: decoded.id}, (err, todos) => {
-      if (err) res.status(500).send(err)
-      res.send({
-        user: decoded,
-        todos: todos
-      })
+  Todo.find({userId: req.decoded.id}, (err, todos) => {
+    if (err) res.status(500).send(err)
+    res.send({
+      user: req.decoded,
+      todos: todos
     })
   })
 }
+
+/* endpoint: /api/add/
+*  methode : POST
+*  require : token(id), todo
+*  desc    : store database
+*  return  : status, user, last inserted 
+*/
+let add = (req, res) => {
+  let addTodo = new Todo({
+    todo: req.body.todo,
+    status: false,
+    userId: req.decoded.id
+  })
+  addTodo.save()
+  .then(result=>{
+    res.send({
+      status: "success",
+      user: req.decoded,
+      inserted: result
+    })
+  }).catch(err=>{
+    res.status(500).send({err: err})
+  })
+}
+
+/* endpoint: /api/edit/:id
+*  methode : PUT
+*  require : token(id), params(id_todo), newtodo
+*  desc    : edit database database
+*  return  : status, user, before
+*/
+let edit = (req, res) => {
+  if (!req.body.todo) res.status(400).send({err: "no todo send"})
+  else {
+    Todo.findById(req.params.id)
+    .then(before=>{
+      Todo.update({ _id: req.params.id }, { todo: req.body.todo })
+      .then(result=>{
+        if(result.nModified == 1){
+          res.send({
+            status: "success",
+            user: req.decoded,
+            before: before
+          })
+        } else {
+          res.status(500).send({err: "unsuccessfull edit"})
+        }
+      }).catch(err=>{
+        res.status(500).send({err: err})
+      })
+    }).catch(err=>{
+      res.status(500).send({err: err})
+    })
+  }
+}
+
+/* endpoint: /api/done/:id
+*  methode : PUT
+*  require : token(id), params(id_todo)
+*  desc    : change todo status to done
+*  return  : status, user, before
+*/
+let done = (req, res) => {
+  changeStatus(req.params.id, req.decoded, true, (err, msg)=>{
+    if(err) res.status(500).send(err)
+    else res.send(msg)
+  })
+}
+
+/* endpoint: /api/undone/:id
+*  methode : PUT
+*  require : token(id), params(id_todo)
+*  desc    : change todo status to undone
+*  return  : status, user, before
+*/
+let undone = (req, res) => {
+  changeStatus(req.params.id, req.decoded, false, (err, msg)=>{
+    if(err) res.status(500).send(err)
+    else res.send(msg)
+  })
+}
+
+/* endpoint: /api/del/:id
+*  methode : DELETE
+*  require : token(id), params(id_todo)
+*  desc    : delete todos
+*  return  : status, user, itemdeleted
+*/
+let del = (req, res) => {
+  Todo.findById(req.params.id)
+  .then(before=>{
+    Todo.remove({ _id: req.params.id })
+    .then(result=>{
+      if(result.n == 1){
+        res.send({
+          status: "success",
+          user: req.decoded,
+          before: before
+        })
+      } else {
+        res.status(500).send({err: "unsuccessfull delete"})
+      }
+    }).catch(err=>{
+      res.status(500).send({err: err})
+    })
+  }).catch(err=>{
+    res.status(500).send({err: err})
+  })
+}
+
 
 module.exports = {
   welcomePage,
   signup,
   signin,
-  mytodo
+  mytodo,
+  add,
+  edit,
+  done,
+  undone,
+  del
 };
