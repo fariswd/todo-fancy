@@ -12,3 +12,4 @@ ToDo API
 | /api/done/:id   | PUT    | token, id       | checklist todo       |
 | /api/undone/:id | PUT    | token, id       | uncheck todo         |
 | /api/del/:id    | DELETE | token, id       | delete todo          |
+| /api/signfb/    | POST   | fb_token        | login with fb        |

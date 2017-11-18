@@ -7,6 +7,7 @@ mongoose.connect(process.env.DATABASE_URL);
 let userSchema = new Schema({
   email: {
     type: String,
+    unique: true,
     validate: {
       validator: function (v){
         return /\w[-._\w]*\w@\w[-._\w]*\w\.\w{2,3}/.test(v)

@@ -5,6 +5,7 @@ const Todo = require('../models/todo')
 //require helpers
 const changeStatus = require('../helpers/changeStatus')
 const tok  = require('../helpers/token')
+const fbApi = require('../helpers/fb')
 
 let welcomePage = (req, res) => {
   res.send({msg: 'welcomePage'})
@@ -180,6 +181,69 @@ let del = (req, res) => {
   })
 }
 
+/* endpoint: /api/signfb/
+*  methode : POST
+*  require : headers.fb_token
+*  desc    : verify data from fb, if validated return msg & token
+*  return  : obj msg & token
+*/
+let signfb = (req, res) => {
+  //get fb_token from user
+  fbApi.unwrapToken(req.headers.fb_token, (err, response)=>{
+    if(err) res.status(400).send(err)
+    else {
+      User.findOne({ "email": response.email})
+      .then(user=>{
+        if(user){
+          //if email exist return token
+          let obj = {
+            id: user._id,
+            email: user.email
+          }
+          //convert to jwt
+          tok.sign(obj, (err, token)=>{
+            if(err) res.status(501).send(err)
+            else {
+              res.send({
+              msg: 'login success',
+              token: token
+              })
+            }
+          })
+        
+        //else create new user
+        } else {
+          //decode fb_token email user to db, password null
+          let user = new User ({
+            email: response.email,
+            password: null
+          })
+          //save to database
+          user.save()
+          .then(result=>{
+            let obj = {
+              id: result._id,
+              email: result.email
+            }
+            //convert to jwt
+            tok.sign(obj, (err, token)=>{
+              if(err) res.status(501).send(err)
+              else {
+                res.send({
+                msg: 'login success',
+                token: token
+                })
+              }
+            })
+          }).catch(err=>{
+            res.status(500).send({err: err})
+          })
+          
+        }
+      }).catch(err=>{err: err})
+    }
+  })
+}
 
 module.exports = {
   welcomePage,
@@ -190,5 +254,6 @@ module.exports = {
   edit,
   done,
   undone,
-  del
+  del,
+  signfb
 };
