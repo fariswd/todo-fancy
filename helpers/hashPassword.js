@@ -22,7 +22,7 @@ let hashed = (req, res, next) => {
 *  check email if exist and
 *  password if true next()
 */
-let reHashed = (req, res, next) => {
+let unHashed = (req, res, next) => {
   User.findOne({'email': req.body.email }, function (err, result) {
     if(err){
       res.status(501).send({err: err})
@@ -40,5 +40,5 @@ let reHashed = (req, res, next) => {
 
 module.exports = {
   hashed,
-  reHashed
+  unHashed
 };

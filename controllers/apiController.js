@@ -1,8 +1,9 @@
-const jwt = require('jsonwebtoken');
-require('dotenv').config()
-
 //require model
 const User = require('../models/user')
+const Todo = require('../models/todo')
+
+//require helpers
+const tok  = require('../helpers/token')
 
 let welcomePage = (req, res) => {
   res.send({msg: 'welcomePage'})
@@ -42,7 +43,7 @@ let signin = (req, res) => {
     email: req.user.email
   }
   //convert to jwt
-  jwt.sign(obj, process.env.SECRET, function(err, token) {
+  tok.sign(obj, (err, token)=>{
     if(err) res.status(501).send(err)
     res.send({
       msg: 'login success',
@@ -51,8 +52,28 @@ let signin = (req, res) => {
   })
 }
 
+/* endpoint: /api/mytodo/
+*  methode : GET
+*  require : token(id)
+*  desc    : find mytodo from db
+*  return  : all my todo
+*/ 
+let mytodo = (req, res) => {
+  //convert to obj
+  tok.decr(req.headers.token, (err, decoded)=>{
+    Todo.find({userId: decoded.id}, (err, todos) => {
+      if (err) res.status(500).send(err)
+      res.send({
+        user: decoded,
+        todos: todos
+      })
+    })
+  })
+}
+
 module.exports = {
   welcomePage,
   signup,
-  signin
+  signin,
+  mytodo
 };
