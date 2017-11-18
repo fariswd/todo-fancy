@@ -5,9 +5,19 @@ const Schema = mongoose.Schema;
 mongoose.connect(process.env.DATABASE_URL);
 
 let userSchema = new Schema({
-  username:  String,
+  email: {
+    type: String,
+    validate: {
+      validator: function (v){
+        return /\w[-._\w]*\w@\w[-._\w]*\w\.\w{2,3}/.test(v)
+      }
+    }
+  },
   password: String,
-  isAdmin:   String
+  createdAt: {
+    type: Date,
+    default: Date.now()
+  }
 });
 
 let User = mongoose.model('User', userSchema);

@@ -8,9 +8,11 @@ app.use(morgan('tiny'))
 
 //route variable
 const index = require('./routers/indexRouter')
+const api = require('./routers/apiRouter')
 
 //route use
 app.use('/', index)
+app.use('/api', api)
 
 //listen
 app.listen(3000, () => {
