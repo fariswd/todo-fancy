@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 //require model
 const User = require('../models/user')
 
-/* Get from req.body.password (non hashed)
+/* Require from req.body.password (non hashed)
 *  Return req.body.password (hashed)
 */
 let hashed = (req, res, next) => {
@@ -22,9 +22,9 @@ let hashed = (req, res, next) => {
   }
 }
 
-/* Get: email & password from req.body
-*  check email if exist and
-*  password if true next()
+/* Require: email & password from req.body
+*  check email if exist,
+*  and password if true next()
 */
 let unHashed = (req, res, next) => {
   if(req.body.username && req.body.password){

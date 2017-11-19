@@ -1,6 +1,9 @@
 //require model
 const Todo = require('../models/todo')
 
+/* Require id, decoded user, status(true/false)
+*  callback (err, obj(status,user,before_data))
+*/
 let changeStatus = (id, decoded, status, cb) => {
   Todo.findById(id)
   .then(before=>{
