@@ -21,11 +21,11 @@ router.post('/signin/', hashHelper.unHashed, apiController.signin)
 // | /api/mytodo     | GET    | token           | get only my todo     |
 router.get('/mytodo/', loginState.checkHeaders, apiController.mytodo)
 
-// | /api/add        | POST   | token, todo     | post new todo        |
-router.post('/add/', loginState.checkHeaders, apiController.add)
+// | /api/todo        | POST   | token, todo     | post new todo        |
+router.post('/todo/', loginState.checkHeaders, apiController.add)
 
-// | /api/edit/:id   | PUT    | token, todo     | edit desc            |
-router.put('/edit/:id', loginState.checkHeaders, apiController.edit)
+// | /api/todo/:id   | PUT    | token, todo     | edit desc            |
+router.put('/todo/:id', loginState.checkHeaders, apiController.edit)
 
 // | /api/done/:id   | PUT    | token, id       | checklist todo       |
 router.put('/done/:id', loginState.checkHeaders, apiController.done)
@@ -33,8 +33,8 @@ router.put('/done/:id', loginState.checkHeaders, apiController.done)
 // | /api/undone/:id | PUT    | token, id       | uncheck todo         |
 router.put('/undone/:id', loginState.checkHeaders, apiController.undone)
 
-// | /api/del/:id    | DELETE | token, id       | delete todo          |
-router.delete('/del/:id', loginState.checkHeaders, apiController.del)
+// | /api/todo/:id    | DELETE | token, id       | delete todo          |
+router.delete('/todo/:id', loginState.checkHeaders, apiController.del)
 
 // | /api/signfb/    | POST   | fb_token        | login with fb        |
 router.post('/signfb/', apiController.signfb)

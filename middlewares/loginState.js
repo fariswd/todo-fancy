@@ -7,8 +7,12 @@ const tok  = require('../helpers/token')
 let checkHeaders = (req, res, next) => {
   if(req.headers.token) {
     tok.decr(req.headers.token, (err, decoded)=>{
-      req.decoded = decoded
-      next()
+      if(decoded){
+        req.decoded = decoded
+        next()
+      } else {
+        res.status(400).send({msg: 'not authorized'})
+      }
     })
   }
   else res.status(400).send({msg: 'not authorized'})

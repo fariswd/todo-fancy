@@ -64,7 +64,7 @@ let signin = (req, res) => {
 */ 
 let mytodo = (req, res) => {
   Todo.find({userId: req.decoded.id}, (err, todos) => {
-    if (err) res.status(500).send(err)
+    if (err) res.status(400).send(err)
     res.send({
       user: req.decoded,
       todos: todos
@@ -164,7 +164,7 @@ let del = (req, res) => {
   .then(before=>{
     Todo.remove({ _id: req.params.id })
     .then(result=>{
-      if(result.n == 1){
+      if(result.result.n == 1){
         res.send({
           status: "success",
           user: req.decoded,

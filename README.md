@@ -18,9 +18,9 @@ $ mongod
 | /api/signup/    | POST   | email, password         | signup               |
 | /api/signin/    | POST   | email, password         | signin return token  |
 | /api/mytodo     | GET    | token(header)           | get only my todo     |
-| /api/add        | POST   | token(header), todo     | post new todo        |
-| /api/edit/:id   | PUT    | token(header), todo     | edit desc            |
+| /api/todo       | POST   | token(header), todo     | post new todo        |
+| /api/todo/:id   | PUT    | token(header), todo     | edit desc            |
+| /api/todo/:id   | DELETE | token(header), id       | delete todo          |
 | /api/done/:id   | PUT    | token(header), id       | checklist todo       |
 | /api/undone/:id | PUT    | token(header), id       | uncheck todo         |
-| /api/del/:id    | DELETE | token(header), id       | delete todo          |
 | /api/signfb/    | POST   | fb_token(header)        | login with fb        |
