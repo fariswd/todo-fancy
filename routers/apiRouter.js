@@ -33,11 +33,23 @@ router.put('/done/:id', loginState.checkHeaders, apiController.done)
 // | /api/undone/:id | PUT    | token, id       | uncheck todo         |
 router.put('/undone/:id', loginState.checkHeaders, apiController.undone)
 
-// | /api/todo/:id    | DELETE | token, id       | delete todo          |
+// | /api/todo/:id    | DELETE | token, id       | delete todo         |
 router.delete('/todo/:id', loginState.checkHeaders, apiController.del)
 
 // | /api/signfb/    | POST   | fb_token        | login with fb        |
 router.post('/signfb/', apiController.signfb)
+
+// | /api/mytagged     | GET    | token           | get only my tagged  |
+router.get('/mytagged/', loginState.checkHeaders, apiController.mytagged)
+
+// | /api/done/tag/:id   | PUT    | token, id       | checklist todo       |
+router.put('/done/tag/:id', loginState.checkHeaders, apiController.doneTag)
+
+// | /api/undone/tag/:id | PUT    | token, id       | uncheck todo         |
+router.put('/undone/tag/:id', loginState.checkHeaders, apiController.undoneTag)
+
+// | /api/todo/tag/:id    | DELETE | token, id       | delete todo         |
+router.delete('/todo/tag/:id', loginState.checkHeaders, apiController.delTag)
 
 //export
 module.exports = router;

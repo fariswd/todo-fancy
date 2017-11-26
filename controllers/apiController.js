@@ -1,11 +1,13 @@
 //require model
 const User = require('../models/user')
 const Todo = require('../models/todo')
+const Tag = require('../models/tag')
 
 //require helpers
 const changeStatus = require('../helpers/changeStatus')
 const tok  = require('../helpers/token')
 const fbApi = require('../helpers/fb')
+const tagger = require('../helpers/tagHandler')
 
 let welcomePage = (req, res) => {
   res.send({msg: 'welcomePage'})
@@ -79,20 +81,31 @@ let mytodo = (req, res) => {
 *  return  : status, user, last inserted 
 */
 let add = (req, res) => {
-  let addTodo = new Todo({
-    todo: req.body.todo,
-    status: false,
-    userId: req.decoded.id
-  })
-  addTodo.save()
-  .then(result=>{
-    res.send({
-      status: "success",
-      user: req.decoded,
-      inserted: result
-    })
-  }).catch(err=>{
-    res.status(500).send({err: err})
+  tagger.tag(req, (err, tagId)=>{
+    if (err) res.status(500).send({err: err})
+    else {
+      let addTodo = new Todo({
+        todo: req.body.todo,
+        tag: tagId,
+        status: false,
+        userId: req.decoded.id
+      })
+      addTodo.save()
+      .then(result=>{
+        tagger.insert(tagId, result, req.decoded, (err, val)=>{
+          if(err) res.status(500).send({err: err})
+          else {
+            res.send({
+              status: "success",
+              user: req.decoded,
+              inserted: result
+            })
+          }
+        })
+      }).catch(err=>{
+        res.status(500).send({err: err})
+      })
+    }
   })
 }
 
@@ -134,7 +147,7 @@ let edit = (req, res) => {
 *  return  : status, user, before
 */
 let done = (req, res) => {
-  changeStatus(req.params.id, req.decoded, true, (err, msg)=>{
+  changeStatus.todo(req.params.id, req.decoded, true, (err, msg)=>{
     if(err) res.status(500).send(err)
     else res.send(msg)
   })
@@ -147,7 +160,7 @@ let done = (req, res) => {
 *  return  : status, user, before
 */
 let undone = (req, res) => {
-  changeStatus(req.params.id, req.decoded, false, (err, msg)=>{
+  changeStatus.todo(req.params.id, req.decoded, false, (err, msg)=>{
     if(err) res.status(500).send(err)
     else res.send(msg)
   })
@@ -245,6 +258,76 @@ let signfb = (req, res) => {
   })
 }
 
+/* endpoint: /api/mytagged/
+*  methode : GET
+*  require : token(id)
+*  desc    : (feature) find mytaged from db
+*  return  : user, all my tagged
+*/ 
+let mytagged = (req, res) => {
+  Tag.find({userId: req.decoded.id}, (err, todos) => {
+    if (err) res.status(400).send(err)
+    res.send({
+      user: req.decoded,
+      todos: todos
+    })
+  })
+}
+
+/* endpoint: /api/done/tag/:id
+*  methode : PUT
+*  require : token(id), params(id_todo)
+*  desc    : change todo status to done in TAG
+*  return  : status, user, before
+*/
+let doneTag = (req, res) => {
+  changeStatus.tag(req.params.id, req.decoded, true, (err, msg)=>{
+    if(err) res.status(500).send(err)
+    else res.send(msg)
+  })
+}
+
+/* endpoint: /api/undone/tag/:id
+*  methode : PUT
+*  require : token(id), params(id_todo)
+*  desc    : change todo status to undone in TAG
+*  return  : status, user, before
+*/
+let undoneTag = (req, res) => {
+  changeStatus.tag(req.params.id, req.decoded, false, (err, msg)=>{
+    if(err) res.status(500).send(err)
+    else res.send(msg)
+  })
+}
+
+/* endpoint: /api/del/tag/:id
+*  methode : DELETE
+*  require : token(id), params(id_todo)
+*  desc    : delete todos TAG
+*  return  : status, user, itemdeleted
+*/
+let delTag = (req, res) => {
+  Tag.findById(req.params.id)
+  .then(before=>{
+    Tag.remove({ _id: req.params.id })
+    .then(result=>{
+      if(result.result.n == 1){
+        res.send({
+          status: "success",
+          user: req.decoded,
+          before: before
+        })
+      } else {
+        res.status(500).send({err: "unsuccessfull delete"})
+      }
+    }).catch(err=>{
+      res.status(500).send({err: err})
+    })
+  }).catch(err=>{
+    res.status(500).send({err: err})
+  })
+}
+
 module.exports = {
   welcomePage,
   signup,
@@ -255,5 +338,10 @@ module.exports = {
   done,
   undone,
   del,
-  signfb
+  signfb,
+  //feature tag
+  mytagged,
+  doneTag,
+  undoneTag,
+  delTag
 };

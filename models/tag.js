@@ -4,8 +4,7 @@ const Schema = mongoose.Schema;
 
 mongoose.connect(process.env.DATABASE_URL);
 
-let todoSchema = new Schema({
-  todo: String,
+let tagSchema = new Schema({
   status: {
     type: Boolean,
     default: false
@@ -14,16 +13,26 @@ let todoSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
-  tag: [{
+  fromId: {
     type: Schema.Types.ObjectId,
     ref: 'User'
-  }],
+  },
+  from: String,
+  todo: String,
+  todoId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Todo'
+  },
   createdAt: {
+    type: Date,
+    default: Date.now()
+  },
+  updatedAt: {
     type: Date,
     default: Date.now()
   }
 });
 
-let Todo = mongoose.model('Todo', todoSchema);
+let Tag = mongoose.model('Tag', tagSchema);
 
-module.exports = Todo;
+module.exports = Tag;
