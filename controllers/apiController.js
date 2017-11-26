@@ -65,7 +65,13 @@ let signin = (req, res) => {
 *  return  : user, all my todo
 */ 
 let mytodo = (req, res) => {
-  Todo.find({userId: req.decoded.id}, (err, todos) => {
+  Todo.find({userId: req.decoded.id}, {},
+    {
+      sort:{
+          createdAt:-1
+      }
+    },
+    (err, todos) => {
     if (err) res.status(400).send(err)
     res.send({
       user: req.decoded,
@@ -284,7 +290,13 @@ let signfb = (req, res) => {
 *  return  : user, all my tagged
 */ 
 let mytagged = (req, res) => {
-  Tag.find({userId: req.decoded.id}, (err, todos) => {
+  Tag.find({userId: req.decoded.id}, {},
+    {
+      sort:{
+          createdAt:-1
+      }
+    },
+    (err, todos) => {
     if (err) res.status(400).send(err)
     res.send({
       user: req.decoded,
