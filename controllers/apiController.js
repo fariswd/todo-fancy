@@ -116,28 +116,47 @@ let add = (req, res) => {
 *  return  : status, user, before
 */
 let edit = (req, res) => {
-  if (!req.body.todo) res.status(400).send({err: "no todo send"})
-  else {
-    Todo.findById(req.params.id)
-    .then(before=>{
-      Todo.update({ _id: req.params.id }, { todo: req.body.todo })
-      .then(result=>{
-        if(result.nModified == 1){
-          res.send({
-            status: "success",
-            user: req.decoded,
-            before: before
+  tagger.tag(req, (err, tagId)=>{
+    if (err) res.status(500).send({err: err})
+    else {
+      if (!req.body.todo) res.status(400).send({err: "no todo send"})
+      else {
+        Todo.findById(req.params.id)
+        .then(before=>{
+          Todo.update({ _id: req.params.id }, {
+            todo: req.body.todo,
+            tag: tagId,
+            status: false,
+            userId: req.decoded.id
           })
-        } else {
-          res.status(500).send({err: "unsuccessfull edit"})
-        }
-      }).catch(err=>{
-        res.status(500).send({err: err})
-      })
-    }).catch(err=>{
-      res.status(500).send({err: err})
-    })
-  }
+          .then(result=>{
+            if(result.nModified == 1){
+              let todo = {
+                todoId: req.params.id,
+                fromId: req.decoded.id,
+                todo: req.body.todo
+              }
+              tagger.insert(tagId, todo, req.decoded, (err, val)=>{
+                if(err) res.status(500).send({err: err})
+                res.send({
+                  status: "success",
+                  user: req.decoded,
+                  before: before
+                })
+              })
+            } else {
+              res.status(500).send({err: "unsuccessfull edit"})
+            }
+          }).catch(err=>{
+            res.status(500).send({err: err})
+          })
+        }).catch(err=>{
+          res.status(500).send({err: err})
+        })
+      }
+      
+    }
+  })
 }
 
 /* endpoint: /api/done/:id
@@ -328,6 +347,39 @@ let delTag = (req, res) => {
   })
 }
 
+/* endpoint: /api/user/
+*  methode : POST
+*  require : [id]
+*  desc    : (feature)
+*  return  : return string email
+*/ 
+let user = (req, res) => {
+  // console.log(req.body.user)
+  let arrOfPromise = []
+  for(let i = 0; i<req.body.user.length; i++){
+    let prom = new Promise((resolve, reject)=>{
+      User.findOne({ _id : req.body.user[i]}, (err, user) => {
+        if (err){
+          reject(err)
+        }
+        else {
+          resolve(user.email)
+        }
+      })
+    })
+    arrOfPromise.push(prom)
+  }
+  Promise.all(arrOfPromise)
+  .then(result=>{
+    res.send({
+      result: result.join(', ')
+    })
+  })
+  .catch(err=>{
+    res.status(500).send({err: err})
+  })
+}
+
 module.exports = {
   welcomePage,
   signup,
@@ -343,5 +395,6 @@ module.exports = {
   mytagged,
   doneTag,
   undoneTag,
-  delTag
+  delTag,
+  user
 };

@@ -28,3 +28,4 @@ $ mongod
 | /api/done/tag/:id   | PUT    | token(header), id       | checklist tagged todo |
 | /api/undone/tag/:id | PUT    | token(header), id       | uncheck tagged todo   |
 | /api/todo/tag/:id   | DELETE | token(header), id       | delete tagged todo    |
+| /api/user/          | POST   | [id]                    | return string email   |

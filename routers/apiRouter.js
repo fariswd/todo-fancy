@@ -51,5 +51,8 @@ router.put('/undone/tag/:id', loginState.checkHeaders, apiController.undoneTag)
 // | /api/todo/tag/:id    | DELETE | token, id       | delete todo         |
 router.delete('/todo/tag/:id', loginState.checkHeaders, apiController.delTag)
 
+// | /api/user/          | POST   | [id]             | return string email   |
+router.post('/user/', apiController.user)
+
 //export
 module.exports = router;

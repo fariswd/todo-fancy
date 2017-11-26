@@ -4,9 +4,22 @@ const User = require('../models/user')
 
 let tag = (req, cb) => {
   let arrOfPromise = []
-  for(let i = 0; i<req.body.tag.length; i++){
+  if(typeof(req.body.tag) == 'object'){ 
+    for(let i = 0; i<req.body.tag.length; i++){
+      let prom = new Promise((resolve, reject)=>{
+        User.findOne({ email: req.body.tag[i] })
+        .then(result=>{
+          resolve(result._id)
+        })
+        .catch(err=>{
+          reject(err)
+        })
+      })
+      arrOfPromise.push(prom)
+    }
+  } else {
     let prom = new Promise((resolve, reject)=>{
-      User.findOne({ email: req.body.tag[i] })
+      User.findOne({ email: req.body.tag })
       .then(result=>{
         resolve(result._id)
       })
@@ -34,8 +47,8 @@ let insert = (userId, todo, decoded, cb)=>{
         userId: userId[i],
         todoId: todo._id,
         fromId: todo.userId,
-        from: decoded.email,
         todo: todo.todo,
+        from: decoded.email,
         status: false
       })
       tag.save()
