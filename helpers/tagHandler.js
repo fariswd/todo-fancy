@@ -3,11 +3,26 @@ const Tag = require('../models/tag')
 const User = require('../models/user')
 
 let tag = (req, cb) => {
-  let arrOfPromise = []
-  if(typeof(req.body.tag) == 'object'){ 
-    for(let i = 0; i<req.body.tag.length; i++){
+  if(req.body.tag[0]==''){
+    cb(null, [])
+  } else {
+    let arrOfPromise = []
+    if(typeof(req.body.tag) == 'object'){ 
+      for(let i = 0; i<req.body.tag.length; i++){
+        let prom = new Promise((resolve, reject)=>{
+          User.findOne({ email: req.body.tag[i] })
+          .then(result=>{
+            resolve(result._id)
+          })
+          .catch(err=>{
+            reject(err)
+          })
+        })
+        arrOfPromise.push(prom)
+      }
+    } else {
       let prom = new Promise((resolve, reject)=>{
-        User.findOne({ email: req.body.tag[i] })
+        User.findOne({ email: req.body.tag })
         .then(result=>{
           resolve(result._id)
         })
@@ -17,26 +32,15 @@ let tag = (req, cb) => {
       })
       arrOfPromise.push(prom)
     }
-  } else {
-    let prom = new Promise((resolve, reject)=>{
-      User.findOne({ email: req.body.tag })
-      .then(result=>{
-        resolve(result._id)
-      })
-      .catch(err=>{
-        reject(err)
-      })
+    Promise.all(arrOfPromise)
+    .then(values=>{ 
+      console.log('values', values)
+      cb(null, values)
     })
-    arrOfPromise.push(prom)
+    .catch(err=>{
+      cb(err, null)
+    })
   }
-  Promise.all(arrOfPromise)
-  .then(values=>{ 
-    cb(null, values)
-  })
-  .catch(err=>{
-    cb(err, null)
-  })
-  
 }
 
 let insert = (userId, todo, decoded, cb)=>{

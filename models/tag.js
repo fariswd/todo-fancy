@@ -1,8 +1,5 @@
-require('dotenv').config()
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
-mongoose.connect(process.env.DATABASE_URL);
 
 let tagSchema = new Schema({
   status: {

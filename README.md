@@ -1,5 +1,7 @@
 # todo-fancy
 ToDo API
+access demo client: http://todo.masfaris.com  
+client repo: https://github.com/fariswd/todo-fancy-client
 
 ## Usage
 1. npm install

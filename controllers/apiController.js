@@ -123,6 +123,7 @@ let add = (req, res) => {
 */
 let edit = (req, res) => {
   tagger.tag(req, (err, tagId)=>{
+    console.log('err', err)
     if (err) res.status(500).send({err: err})
     else {
       if (!req.body.todo) res.status(400).send({err: "no todo send"})
